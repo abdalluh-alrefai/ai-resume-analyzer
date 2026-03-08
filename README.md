@@ -16,6 +16,28 @@ https://ai-resume-analyzer-v8.streamlit.app
 
 ---
 
+# Application Screenshots
+
+## Home Page
+![Home](screenshots/Home.png)
+
+## Resume Analyzer
+![Analyzer](screenshots/Analyzer 1.png)
+![Analyzer](screenshots/Analyzer 2.png)
+![Analyzer](screenshots/Analyzer 3.png)
+
+## Dashboard
+![Dashboard](screenshots/Dashboard.png)
+
+## Resume Builder
+![Builder](screenshots/Builder.png)
+
+## Resume Templates
+![Templates](screenshots/Templates.png)
+
+## Cover Letter Generator
+![CoverLetter](screenshots/Generator.png)
+
 # Features
 
 ### Resume Analysis
