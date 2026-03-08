@@ -1,75 +1,52 @@
 import streamlit as st
-from utils import extract_text_from_file
+from utils import extract_text_from_file, generate_analysis_report
 from analyzer import analyze_resume_basic, generate_resume_builder_output
 
-from database import init_db, update_usage, get_usage
-from auth import login_page, signup_page
+st.set_page_config(page_title="AI Resume Analyzer", page_icon="📄", layout="wide")
 
-init_db()
+st.markdown("""
+<style>
+.main-title{
+font-size:42px;
+font-weight:700;
+}
 
-st.set_page_config(page_title="AI Resume Analyzer SaaS", layout="wide")
+.subtitle{
+font-size:18px;
+color:#aaa;
+}
 
-# SESSION
-if "user" not in st.session_state:
-    st.session_state["user"] = None
-
-
-# LANDING PAGE
-def landing_page():
-
-    st.title("AI Resume Analyzer")
-
-    st.write("""
-Analyze resumes, improve ATS score, compare with job descriptions,
-rewrite summaries, and build resumes with AI.
-""")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        if st.button("Login"):
-            st.session_state["page"] = "login"
-            st.rerun()
-
-    with col2:
-        if st.button("Sign Up"):
-            st.session_state["page"] = "signup"
-            st.rerun()
-
-    st.markdown("---")
-
-    st.header("Pricing")
-
-    st.write("""
-Free Plan
-- 1 resume per day
-
-Pro Plan
-- Unlimited resumes
-- AI Resume Builder
-- $5 / month
-""")
+.card{
+background:#111827;
+padding:20px;
+border-radius:12px;
+margin-top:10px;
+}
+</style>
+""", unsafe_allow_html=True)
 
 
-# ANALYZER
-def analyzer_page():
+st.markdown('<div class="main-title">AI Resume Analyzer</div>', unsafe_allow_html=True)
 
-    user = st.session_state["user"]
+st.markdown(
+'<div class="subtitle">Analyze resumes, improve ATS score, compare with job descriptions and generate AI resume drafts.</div>',
+unsafe_allow_html=True
+)
 
-    user_id = user[0]
-    plan = user[3]
+tab1, tab2 = st.tabs(["Resume Analyzer", "AI Resume Builder"])
 
-    st.title("AI Resume Analyzer")
+# ---------------------------------
+# Resume Analyzer
+# ---------------------------------
 
-    usage = get_usage(user_id)
-
-    if plan == "free" and usage >= 1:
-        st.error("Free plan limit reached (1 resume per day). Upgrade to Pro.")
-        return
+with tab1:
 
     uploaded_file = st.file_uploader("Upload Resume", type=["pdf", "docx"])
 
-    job_description = st.text_area("Job Description")
+    job_description = st.text_area(
+        "Optional: Paste Job Description",
+        height=150
+    )
 
     if uploaded_file:
 
@@ -77,33 +54,90 @@ def analyzer_page():
 
         result = analyze_resume_basic(text, job_description)
 
-        st.metric("Resume Score", result["score"])
-        st.metric("ATS Score", result["ats_score"])
+        col1, col2, col3 = st.columns(3)
 
-        st.write("Skills:", result["skills"])
+        col1.metric("Resume Score", result["score"])
+        col2.metric("ATS Score", result["ats_score"])
+        col3.metric("Job Match", result["match_score"])
 
-        update_usage(user_id)
+        st.markdown("### Contact Information")
+        st.write("Email:", result["email"])
+        st.write("Phone:", result["phone"])
+
+        st.markdown("### Resume Summary")
+        st.write(result["summary"])
+
+        st.markdown("### AI Resume Rewrite")
+        st.write(result["rewritten_summary"])
+
+        st.markdown("### Rewrite Tips")
+
+        for tip in result["rewrite_tips"]:
+            st.write("-", tip)
+
+        st.markdown("### Extracted Skills")
+
+        st.write(result["skills"])
+
+        if job_description:
+
+            st.markdown("### Matched Skills")
+            st.write(result["matched_skills"])
+
+            st.markdown("### Missing Skills")
+            st.write(result["missing_skills"])
+
+        st.markdown("### ATS Improvement Suggestions")
+
+        for s in result["ats_improvement_suggestions"]:
+            st.write("-", s)
+
+        report = generate_analysis_report(result)
+
+        st.download_button(
+            "Download Report",
+            data=report,
+            file_name="resume_analysis.txt"
+        )
 
 
-# BUILDER
-def builder_page():
+# ---------------------------------
+# Resume Builder
+# ---------------------------------
 
-    st.title("AI Resume Builder")
+with tab2:
 
-    name = st.text_input("Name")
-    title = st.text_input("Title")
+    st.header("AI Resume Builder")
+
+    name = st.text_input("Full Name")
+    title = st.text_input("Professional Title")
 
     email = st.text_input("Email")
     phone = st.text_input("Phone")
 
     location = st.text_input("Location")
 
-    skills = st.text_area("Skills")
-    experience = st.text_area("Experience")
-    education = st.text_area("Education")
-    projects = st.text_area("Projects")
+    skills = st.text_area(
+        "Skills",
+        placeholder="Python, SQL, Excel, Communication"
+    )
 
-    if st.button("Generate Resume"):
+    experience = st.text_area(
+        "Work Experience",
+        height=150
+    )
+
+    education = st.text_area(
+        "Education",
+        height=120
+    )
+
+    projects = st.text_area(
+        "Projects / Certifications",
+        height=120
+    )
+
+    if st.button("Generate Resume Draft"):
 
         summary, resume = generate_resume_builder_output(
             name,
@@ -117,40 +151,16 @@ def builder_page():
             projects
         )
 
-        st.subheader("Summary")
+        st.markdown("### Generated Summary")
+
         st.write(summary)
 
-        st.subheader("Resume")
+        st.markdown("### Generated Resume")
+
         st.text(resume)
 
-
-# ROUTER
-page = st.session_state.get("page", "landing")
-
-if st.session_state["user"] is None:
-
-    if page == "login":
-        login_page()
-
-    elif page == "signup":
-        signup_page()
-
-    else:
-        landing_page()
-
-else:
-
-    menu = st.sidebar.selectbox(
-        "Menu",
-        ["Resume Analyzer", "Resume Builder"]
-    )
-
-    if menu == "Resume Analyzer":
-        analyzer_page()
-
-    if menu == "Resume Builder":
-        builder_page()
-
-    if st.sidebar.button("Logout"):
-        st.session_state["user"] = None
-        st.rerun()
+        st.download_button(
+            "Download Resume Draft",
+            data=resume,
+            file_name="resume.txt"
+        )
