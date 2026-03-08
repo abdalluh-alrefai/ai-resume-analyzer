@@ -29,16 +29,12 @@ st.markdown("""
         margin-top: 20px;
         margin-bottom: 10px;
     }
-    .small-label {
-        color: #9ca3af;
-        font-size: 14px;
-    }
     </style>
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="main-title">📄 AI Resume Analyzer</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle">Upload a resume in PDF or DOCX format and get smart analysis, matching, and improvement suggestions.</div>',
+    '<div class="subtitle">Upload a resume in PDF or DOCX format and get smart analysis, matching, ATS insights, and AI-style rewrite suggestions.</div>',
     unsafe_allow_html=True
 )
 
@@ -65,7 +61,7 @@ if uploaded_file is not None:
         )
 
         st.markdown('<div class="section-title">Extracted Resume Text</div>', unsafe_allow_html=True)
-        st.text_area("Resume Content", text, height=260)
+        st.text_area("Resume Content", text, height=240)
 
         st.markdown('<div class="section-title">Analysis Dashboard</div>', unsafe_allow_html=True)
 
@@ -100,6 +96,17 @@ if uploaded_file is not None:
             st.subheader("Resume Summary")
             st.write(result["summary"])
             st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.subheader("AI Resume Rewrite")
+        st.write(result["rewritten_summary"])
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="card">', unsafe_allow_html=True)
+        st.subheader("Rewrite Tips")
+        for item in result["rewrite_tips"]:
+            st.write(f"- {item}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.subheader("Extracted Skills")

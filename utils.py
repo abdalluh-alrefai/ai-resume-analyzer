@@ -63,6 +63,7 @@ def generate_analysis_report(result, summary_text, matched_skills, missing_skill
         "=" * 30,
         "",
         f"Resume Score: {result['score']}/100",
+        f"ATS Compatibility Score: {result['ats_score']}%",
         f"Resume Match Score: {match_score}%",
         "",
         "Contact Information",
@@ -73,6 +74,19 @@ def generate_analysis_report(result, summary_text, matched_skills, missing_skill
         "Resume Summary",
         "-" * 20,
         summary_text,
+        "",
+        "AI Resume Rewrite",
+        "-" * 20,
+        result["rewritten_summary"],
+        "",
+        "Rewrite Tips",
+        "-" * 20,
+    ]
+
+    for item in result["rewrite_tips"]:
+        lines.append(f"- {item}")
+
+    lines.extend([
         "",
         "Extracted Skills",
         "-" * 20,
@@ -88,7 +102,7 @@ def generate_analysis_report(result, summary_text, matched_skills, missing_skill
         "",
         "Strengths",
         "-" * 20,
-    ]
+    ])
 
     for item in result["strengths"]:
         lines.append(f"- {item}")

@@ -183,21 +183,25 @@ def calculate_match_score(resume_skills, job_skills):
     return min(score, 100)
 
 
-def generate_resume_summary(text, skills):
+def detect_role(text):
     text_lower = normalize_text(text)
 
-    role = "professional"
     if "front end developer" in text_lower:
-        role = "Front-End Developer"
-    elif "data engineer" in text_lower:
-        role = "Data Engineer"
-    elif "project manager" in text_lower:
-        role = "Project Manager"
-    elif "teacher" in text_lower or "arabic language" in text_lower:
-        role = "Teacher / Education Professional"
-    elif "warehouse" in text_lower:
-        role = "Warehouse / Logistics Professional"
+        return "Front-End Developer"
+    if "data engineer" in text_lower:
+        return "Data Engineer"
+    if "project manager" in text_lower:
+        return "Project Manager"
+    if "teacher" in text_lower or "arabic language" in text_lower:
+        return "Teacher / Education Professional"
+    if "warehouse" in text_lower:
+        return "Warehouse / Logistics Professional"
 
+    return "Professional"
+
+
+def generate_resume_summary(text, skills):
+    role = detect_role(text)
     top_skills = ", ".join(skills[:5]) if skills else "various relevant skills"
 
     return (
@@ -206,6 +210,38 @@ def generate_resume_summary(text, skills):
         f"education, work experience, and skills, and it is suitable for further tailoring "
         f"based on the target job description."
     )
+
+
+def generate_resume_rewrite(text, skills, job_description=""):
+    role = detect_role(text)
+    top_skills = skills[:6]
+    top_skills_text = ", ".join(top_skills) if top_skills else "relevant professional skills"
+
+    if job_description.strip():
+        rewrite = (
+            f"Results-driven {role} with experience in {top_skills_text}. "
+            f"Demonstrates a strong background in delivering high-quality work, "
+            f"maintaining professional standards, and adapting experience to match job requirements. "
+            f"Brings a combination of technical knowledge, practical execution, and communication skills "
+            f"that can add value in fast-paced work environments."
+        )
+    else:
+        rewrite = (
+            f"Results-driven {role} with experience in {top_skills_text}. "
+            f"Demonstrates a strong background in professional responsibilities, practical execution, "
+            f"and continuous improvement. Brings a combination of relevant expertise, organization, "
+            f"and communication skills that supports success across day-to-day operations and long-term goals."
+        )
+
+    rewrite_tips = [
+        "Start your resume with a strong 2 to 4 line professional summary tailored to the target role.",
+        "Use action verbs such as developed, managed, led, improved, delivered, and implemented.",
+        "Include measurable achievements whenever possible, such as percentages, time saved, or revenue impact.",
+        "Keep your skills section focused on the most relevant tools and competencies for the target job.",
+        "Tailor your wording to match the job description without adding skills you do not actually have."
+    ]
+
+    return rewrite, rewrite_tips
 
 
 def analyze_resume_basic(text, job_description=""):
@@ -221,6 +257,7 @@ def analyze_resume_basic(text, job_description=""):
     ats_score = calculate_ats_score(text, skills)
     match_score = calculate_match_score(skills, job_skills)
     summary = generate_resume_summary(text, skills)
+    rewritten_summary, rewrite_tips = generate_resume_rewrite(text, skills, job_description)
 
     strengths = []
     weaknesses = []
@@ -287,5 +324,7 @@ def analyze_resume_basic(text, job_description=""):
         "email": email,
         "phone": phone,
         "summary": summary,
-        "match_score": match_score
+        "match_score": match_score,
+        "rewritten_summary": rewritten_summary,
+        "rewrite_tips": rewrite_tips
     }
