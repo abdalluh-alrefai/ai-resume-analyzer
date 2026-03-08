@@ -1,5 +1,6 @@
 import re
 
+
 TECHNICAL_SKILLS = [
     "python", "java", "c++", "sql", "machine learning", "deep learning",
     "data analysis", "pandas", "numpy", "tensorflow", "pytorch",
@@ -116,28 +117,20 @@ def calculate_resume_score(text, skills, job_skills):
 
     if len(text) > 300:
         score += 15
-
     if len(text) > 700:
         score += 10
-
     if len(skills) >= 3:
         score += 15
-
     if len(skills) >= 6:
         score += 10
-
     if has_any_section(text, SECTION_KEYWORDS["education"]):
         score += 10
-
     if has_any_section(text, SECTION_KEYWORDS["experience"]):
         score += 15
-
     if has_any_section(text, SECTION_KEYWORDS["skills"]):
         score += 10
-
     if has_any_section(text, SECTION_KEYWORDS["contact"]):
         score += 10
-
     if has_any_section(text, SECTION_KEYWORDS["projects"]):
         score += 5
 
@@ -154,28 +147,20 @@ def calculate_ats_score(text, skills):
 
     if len(text) > 500:
         score += 15
-
     if len(skills) >= 5:
         score += 20
-
     if "education" in text_lower:
         score += 10
-
     if "experience" in text_lower or "employment" in text_lower:
         score += 20
-
     if "skills" in text_lower or "competencies" in text_lower:
         score += 10
-
     if "projects" in text_lower:
         score += 10
-
     if "certifications" in text_lower or "courses" in text_lower or "training" in text_lower:
         score += 5
-
     if re.search(r'[\w\.-]+@[\w\.-]+\.\w+', text):
         score += 5
-
     if re.search(r'(\+?\d[\d\s\-\(\)]{7,}\d)', text):
         score += 5
 
@@ -185,7 +170,6 @@ def calculate_ats_score(text, skills):
 def calculate_match_score(resume_skills, job_skills):
     if not job_skills:
         return 0
-
     matched = set(resume_skills) & set(job_skills)
     score = int((len(matched) / len(job_skills)) * 100)
     return min(score, 100)
@@ -215,7 +199,6 @@ def detect_role(text):
 def generate_resume_summary(text, skills):
     role = detect_role(text)
     top_skills = ", ".join(skills[:5]) if skills else "various relevant skills"
-
     return (
         f"This resume appears to belong to a {role} with experience and qualifications "
         f"that include {top_skills}. The resume contains key professional sections such as "
@@ -261,29 +244,21 @@ def generate_ats_improvement_suggestions(text, email, phone, missing_skills, job
 
     if not email:
         suggestions.append("Add a professional email address to improve ATS compatibility.")
-
     if not phone:
         suggestions.append("Add a phone number so recruiters and ATS systems can identify complete contact information.")
-
     if not has_any_section(text, SECTION_KEYWORDS["skills"]):
         suggestions.append("Add a dedicated skills section with clear keywords related to your target role.")
-
     if not has_any_section(text, SECTION_KEYWORDS["experience"]):
         suggestions.append("Add a clear work experience section with job titles, company names, and dates.")
-
     if not has_any_section(text, SECTION_KEYWORDS["education"]):
         suggestions.append("Add an education section with degree, institution, and graduation details.")
-
     if not has_any_section(text, SECTION_KEYWORDS["projects"]):
         suggestions.append("Add projects, certifications, or training to increase keyword coverage and ATS strength.")
-
     if len(text) < 450:
         suggestions.append("Add more role-specific detail and measurable achievements to make the resume stronger for ATS screening.")
-
     if job_description.strip() and missing_skills:
         top_missing = ", ".join(missing_skills[:5])
         suggestions.append(f"Consider adding relevant job keywords if you truly have them, such as: {top_missing}.")
-
     if not suggestions:
         suggestions.append("The resume already has a strong ATS-friendly structure. Focus on tailoring it for each target job.")
 
@@ -297,14 +272,15 @@ def generate_resume_builder_output(name, title, email, phone, location, skills, 
     project_lines = [item.strip() for item in projects.split("\n") if item.strip()]
 
     top_skills = ", ".join(skills_list[:6]) if skills_list else "relevant professional skills"
+    role_text = title if title.strip() else "Professional"
 
     summary = (
-        f"{name} is a {title} with experience in {top_skills}. "
+        f"{name} is a {role_text} with experience in {top_skills}. "
         f"Known for delivering high-quality work, strong communication, and professional execution."
     )
 
     resume_text = f"""{name}
-{title}
+{role_text}
 Email: {email or "your.email@example.com"}
 Phone: {phone or "Your phone number"}
 Location: {location or "Your location"}
@@ -342,6 +318,53 @@ SKILLS
         resume_text += "- Add your projects, certifications, or training here\n"
 
     return summary, resume_text
+
+
+def generate_resume_template_output(template_style, name, title, email, phone, location, skills, experience, education, projects):
+    summary, resume_text = generate_resume_builder_output(
+        name=name,
+        title=title,
+        email=email,
+        phone=phone,
+        location=location,
+        skills=skills,
+        experience=experience,
+        education=education,
+        projects=projects
+    )
+
+    header = f"TEMPLATE STYLE: {template_style}\n" + "=" * 50 + "\n"
+    if template_style == "Classic Professional":
+        return header + resume_text
+    if template_style == "Modern Minimal":
+        return header + f"{name} | {title}\n{location} | {email} | {phone}\n\n{resume_text}"
+    return header + f"ATS OPTIMIZED VERSION\n\n{resume_text}"
+
+
+def generate_cover_letter(name, role, company, skills, experience, job_description):
+    skills_text = skills if skills.strip() else "relevant skills"
+    experience_text = experience if experience.strip() else "hands-on practical experience"
+
+    company_text = company if company.strip() else "your company"
+    role_text = role if role.strip() else "the role"
+
+    extra = ""
+    if job_description.strip():
+        extra = (
+            "\nI have reviewed the role requirements carefully and I believe my background aligns well "
+            "with the skills and expectations described in the job posting."
+        )
+
+    return f"""Dear Hiring Manager,
+
+I am writing to express my interest in the {role_text} position at {company_text}. With a background in {skills_text}, along with {experience_text}, I am confident in my ability to contribute meaningful value to your team.
+
+Throughout my work, I have focused on delivering high-quality results, improving processes, and maintaining strong communication and professional standards.{extra}
+
+I would welcome the opportunity to discuss how my background, skills, and motivation can support your team’s goals. Thank you for your time and consideration.
+
+Sincerely,
+{name or "Your Name"}"""
 
 
 def analyze_resume_basic(text, job_description=""):

@@ -8,9 +8,9 @@ def extract_text_from_file(uploaded_file):
         text = ""
 
         for page in reader.pages:
-            t = page.extract_text()
-            if t:
-                text += t + "\n"
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text + "\n"
 
         return text
 
@@ -18,8 +18,8 @@ def extract_text_from_file(uploaded_file):
         doc = Document(uploaded_file)
         text = ""
 
-        for p in doc.paragraphs:
-            text += p.text + "\n"
+        for paragraph in doc.paragraphs:
+            text += paragraph.text + "\n"
 
         return text
 
