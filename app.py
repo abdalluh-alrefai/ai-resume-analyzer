@@ -2,7 +2,7 @@ import streamlit as st
 from utils import extract_text_from_file, generate_analysis_report
 from analyzer import analyze_resume_basic, generate_resume_builder_output
 
-st.set_page_config(page_title="AI Resume Analyzer", page_icon="📄", layout="wide")
+st.set_page_config(page_title="AI Resume Analyzer Pro", page_icon="📄", layout="wide")
 
 st.markdown("""
 <style>
@@ -27,9 +27,9 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">AI Resume Analyzer</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">AI Resume Analyzer Pro</div>', unsafe_allow_html=True)
 st.markdown(
-    '<div class="subtitle">Analyze resumes, improve ATS score, compare with job descriptions, and generate AI resume drafts.</div>',
+    '<div class="subtitle">Analyze resumes, improve ATS score, compare with job descriptions, identify strengths and weaknesses, and generate AI resume drafts.</div>',
     unsafe_allow_html=True
 )
 
@@ -40,7 +40,7 @@ with tab1:
 
     job_description = st.text_area(
         "Optional: Paste Job Description",
-        height=150
+        height=160
     )
 
     if uploaded_file:
@@ -81,20 +81,41 @@ with tab1:
                 st.markdown(f"- {tip}")
             st.markdown('</div>', unsafe_allow_html=True)
 
+            col4, col5 = st.columns(2)
+
+            with col4:
+                st.markdown('<div class="card">', unsafe_allow_html=True)
+                st.subheader("Strengths")
+                if result["strengths"]:
+                    for item in result["strengths"]:
+                        st.markdown(f"- {item}")
+                else:
+                    st.write("No major strengths detected.")
+                st.markdown('</div>', unsafe_allow_html=True)
+
+            with col5:
+                st.markdown('<div class="card">', unsafe_allow_html=True)
+                st.subheader("Weaknesses")
+                if result["weaknesses"]:
+                    for item in result["weaknesses"]:
+                        st.markdown(f"- {item}")
+                else:
+                    st.write("No major weaknesses detected.")
+                st.markdown('</div>', unsafe_allow_html=True)
+
             st.markdown('<div class="card">', unsafe_allow_html=True)
             st.subheader("Extracted Skills")
-            skills = result["skills"]
-            if skills:
-                for skill in skills:
+            if result["skills"]:
+                for skill in result["skills"]:
                     st.markdown(f"- {skill.title()}")
             else:
                 st.write("No skills detected.")
             st.markdown('</div>', unsafe_allow_html=True)
 
             if job_description.strip():
-                col4, col5 = st.columns(2)
+                col6, col7 = st.columns(2)
 
-                with col4:
+                with col6:
                     st.markdown('<div class="card">', unsafe_allow_html=True)
                     st.subheader("Matched Skills")
                     if result["matched_skills"]:
@@ -104,7 +125,7 @@ with tab1:
                         st.write("No matched skills found.")
                     st.markdown('</div>', unsafe_allow_html=True)
 
-                with col5:
+                with col7:
                     st.markdown('<div class="card">', unsafe_allow_html=True)
                     st.subheader("Missing Skills")
                     if result["missing_skills"]:
@@ -117,6 +138,12 @@ with tab1:
             st.markdown('<div class="card">', unsafe_allow_html=True)
             st.subheader("ATS Improvement Suggestions")
             for suggestion in result["ats_improvement_suggestions"]:
+                st.markdown(f"- {suggestion}")
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            st.markdown('<div class="card">', unsafe_allow_html=True)
+            st.subheader("Additional Suggestions")
+            for suggestion in result["suggestions"]:
                 st.markdown(f"- {suggestion}")
             st.markdown('</div>', unsafe_allow_html=True)
 
@@ -180,7 +207,7 @@ with tab2:
 
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.subheader("Generated Resume")
-        st.text(resume)
+        st.code(resume)
         st.markdown('</div>', unsafe_allow_html=True)
 
         st.download_button(

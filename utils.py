@@ -44,6 +44,12 @@ Summary:
 AI Resume Rewrite:
 {result["rewritten_summary"]}
 
+Strengths:
+{chr(10).join("- " + s for s in result["strengths"])}
+
+Weaknesses:
+{chr(10).join("- " + s for s in result["weaknesses"])}
+
 Skills:
 {", ".join(result["skills"])}
 
@@ -55,6 +61,8 @@ Missing Skills:
 
 ATS Suggestions:
 {chr(10).join("- " + s for s in result["ats_improvement_suggestions"])}
-"""
 
+Additional Suggestions:
+{chr(10).join("- " + s for s in result["suggestions"])}
+"""
     return report

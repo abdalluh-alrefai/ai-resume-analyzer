@@ -366,6 +366,61 @@ def analyze_resume_basic(text, job_description=""):
         job_description=job_description
     )
 
+    strengths = []
+    weaknesses = []
+    suggestions = []
+
+    if skills:
+        strengths.append("Relevant skills were detected in the resume.")
+    else:
+        weaknesses.append("No clear skills were detected.")
+        suggestions.append("Add a clear skills section with role-related technologies and competencies.")
+
+    if has_any_section(text, SECTION_KEYWORDS["education"]):
+        strengths.append("Education section is present.")
+    else:
+        weaknesses.append("Education section is missing or unclear.")
+        suggestions.append("Add your degree, institution, and graduation details.")
+
+    if has_any_section(text, SECTION_KEYWORDS["experience"]):
+        strengths.append("Work experience section is present.")
+    else:
+        weaknesses.append("Work experience section is missing or unclear.")
+        suggestions.append("Add job titles, company names, dates, and responsibilities.")
+
+    if has_any_section(text, SECTION_KEYWORDS["skills"]):
+        strengths.append("Skills or competencies section is present.")
+    else:
+        weaknesses.append("Skills section is missing or unclear.")
+        suggestions.append("Create a dedicated skills section to improve readability and ATS matching.")
+
+    if email:
+        strengths.append("Email address was detected.")
+    else:
+        weaknesses.append("Email address is missing.")
+        suggestions.append("Add a professional email address.")
+
+    if phone:
+        strengths.append("Phone number was detected.")
+    else:
+        weaknesses.append("Phone number is missing.")
+        suggestions.append("Add a phone number for easier recruiter contact.")
+
+    if len(text) < 400:
+        weaknesses.append("Resume content appears too short.")
+        suggestions.append("Add more measurable achievements, responsibilities, and role-specific details.")
+
+    if not has_any_section(text, SECTION_KEYWORDS["projects"]):
+        weaknesses.append("Projects or certifications section is missing or limited.")
+        suggestions.append("Add projects, certifications, or training courses to strengthen the resume.")
+
+    if job_description.strip() and not matched_skills:
+        weaknesses.append("No strong overlap with the provided job description was found.")
+        suggestions.append("Tailor your resume to the target job description using relevant keywords.")
+
+    if not suggestions:
+        suggestions.append("The resume looks solid overall. Tailor it for each role to improve results.")
+
     return {
         "score": score,
         "ats_score": ats_score,
@@ -378,5 +433,8 @@ def analyze_resume_basic(text, job_description=""):
         "match_score": match_score,
         "rewritten_summary": rewritten_summary,
         "rewrite_tips": rewrite_tips,
-        "ats_improvement_suggestions": ats_improvement_suggestions
+        "ats_improvement_suggestions": ats_improvement_suggestions,
+        "strengths": strengths,
+        "weaknesses": weaknesses,
+        "suggestions": suggestions
     }
