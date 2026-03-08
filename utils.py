@@ -57,14 +57,14 @@ def extract_text_from_file(uploaded_file):
     return "Unsupported file type. Please upload a PDF or DOCX file."
 
 
-def generate_analysis_report(result, summary_text, matched_skills, missing_skills, match_score):
+def generate_analysis_report(result):
     lines = [
         "AI Resume Analyzer Report",
         "=" * 30,
         "",
         f"Resume Score: {result['score']}/100",
         f"ATS Compatibility Score: {result['ats_score']}%",
-        f"Resume Match Score: {match_score}%",
+        f"Resume Match Score: {result['match_score']}%",
         "",
         "Contact Information",
         "-" * 20,
@@ -73,7 +73,7 @@ def generate_analysis_report(result, summary_text, matched_skills, missing_skill
         "",
         "Resume Summary",
         "-" * 20,
-        summary_text,
+        result["summary"],
         "",
         "AI Resume Rewrite",
         "-" * 20,
@@ -88,17 +88,26 @@ def generate_analysis_report(result, summary_text, matched_skills, missing_skill
 
     lines.extend([
         "",
+        "ATS Improvement Suggestions",
+        "-" * 20,
+    ])
+
+    for item in result["ats_improvement_suggestions"]:
+        lines.append(f"- {item}")
+
+    lines.extend([
+        "",
         "Extracted Skills",
         "-" * 20,
         ", ".join(result["skills"]) if result["skills"] else "No skills detected",
         "",
         "Matched Skills",
         "-" * 20,
-        ", ".join(matched_skills) if matched_skills else "No matched skills",
+        ", ".join(result["matched_skills"]) if result["matched_skills"] else "No matched skills",
         "",
-        "Missing Skills",
+        "Missing Skills / Keywords",
         "-" * 20,
-        ", ".join(missing_skills) if missing_skills else "No major missing skills detected",
+        ", ".join(result["missing_skills"]) if result["missing_skills"] else "No major missing skills detected",
         "",
         "Strengths",
         "-" * 20,

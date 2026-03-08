@@ -14,7 +14,8 @@ SOFT_SKILLS = [
     "communication", "leadership", "teamwork", "team worker", "critical thinking",
     "problem solving", "creativity", "time management", "adaptability",
     "organization", "collaboration", "presentation", "planning",
-    "attention to detail", "innovative", "highly organized"
+    "attention to detail", "innovative", "highly organized", "detail oriented",
+    "quick learner", "team player", "self motivated", "proactive"
 ]
 
 EDUCATION_TEACHING_SKILLS = [
@@ -42,20 +43,27 @@ PROJECT_MANAGEMENT_SKILLS = [
     "stakeholder management", "documentation", "budgeting"
 ]
 
+MARKETING_BUSINESS_SKILLS = [
+    "marketing", "digital marketing", "sales", "business development",
+    "market research", "customer service", "report writing", "microsoft office",
+    "word", "powerpoint", "presentation skills", "negotiation"
+]
+
 GENERAL_KEYWORDS = (
     TECHNICAL_SKILLS
     + SOFT_SKILLS
     + EDUCATION_TEACHING_SKILLS
     + LOGISTICS_SKILLS
     + PROJECT_MANAGEMENT_SKILLS
+    + MARKETING_BUSINESS_SKILLS
 )
 
 SECTION_KEYWORDS = {
-    "education": ["education", "university", "bachelor", "degree", "college", "courses", "master"],
-    "experience": ["experience", "employment", "work experience", "teacher", "associate", "assistant", "internship", "manager", "developer", "engineer"],
-    "skills": ["skills", "technical skills", "management skills", "qualifications"],
+    "education": ["education", "university", "bachelor", "degree", "college", "courses", "master", "diploma"],
+    "experience": ["experience", "employment", "work experience", "teacher", "associate", "assistant", "internship", "manager", "developer", "engineer", "supervisor", "team leader"],
+    "skills": ["skills", "technical skills", "management skills", "qualifications", "competencies", "core competencies"],
     "projects": ["projects", "project", "achievements", "certifications", "training"],
-    "contact": ["email", "phone", "address", "linkedin", "github"]
+    "contact": ["email", "phone", "address", "linkedin", "github", "mobile"]
 }
 
 
@@ -156,13 +164,13 @@ def calculate_ats_score(text, skills):
     if "experience" in text_lower or "employment" in text_lower:
         score += 20
 
-    if "skills" in text_lower:
+    if "skills" in text_lower or "competencies" in text_lower:
         score += 10
 
     if "projects" in text_lower:
         score += 10
 
-    if "certifications" in text_lower or "courses" in text_lower:
+    if "certifications" in text_lower or "courses" in text_lower or "training" in text_lower:
         score += 5
 
     if re.search(r'[\w\.-]+@[\w\.-]+\.\w+', text):
@@ -196,6 +204,10 @@ def detect_role(text):
         return "Teacher / Education Professional"
     if "warehouse" in text_lower:
         return "Warehouse / Logistics Professional"
+    if "marketing" in text_lower:
+        return "Marketing Professional"
+    if "h.s.e" in text_lower or "safety" in text_lower:
+        return "HSE / Safety Professional"
 
     return "Professional"
 
@@ -244,6 +256,95 @@ def generate_resume_rewrite(text, skills, job_description=""):
     return rewrite, rewrite_tips
 
 
+def generate_ats_improvement_suggestions(text, email, phone, missing_skills, job_description=""):
+    suggestions = []
+
+    if not email:
+        suggestions.append("Add a professional email address to improve ATS compatibility.")
+
+    if not phone:
+        suggestions.append("Add a phone number so recruiters and ATS systems can identify complete contact information.")
+
+    if not has_any_section(text, SECTION_KEYWORDS["skills"]):
+        suggestions.append("Add a dedicated skills section with clear keywords related to your target role.")
+
+    if not has_any_section(text, SECTION_KEYWORDS["experience"]):
+        suggestions.append("Add a clear work experience section with job titles, company names, and dates.")
+
+    if not has_any_section(text, SECTION_KEYWORDS["education"]):
+        suggestions.append("Add an education section with degree, institution, and graduation details.")
+
+    if not has_any_section(text, SECTION_KEYWORDS["projects"]):
+        suggestions.append("Add projects, certifications, or training to increase keyword coverage and ATS strength.")
+
+    if len(text) < 450:
+        suggestions.append("Add more role-specific detail and measurable achievements to make the resume stronger for ATS screening.")
+
+    if job_description.strip() and missing_skills:
+        top_missing = ", ".join(missing_skills[:5])
+        suggestions.append(f"Consider adding relevant job keywords if you truly have them, such as: {top_missing}.")
+
+    if not suggestions:
+        suggestions.append("The resume already has a strong ATS-friendly structure. Focus on tailoring it for each target job.")
+
+    return suggestions
+
+
+def generate_resume_builder_output(name, title, email, phone, location, skills, experience, education, projects):
+    skills_list = [item.strip() for item in skills.split(",") if item.strip()]
+    experience_lines = [item.strip() for item in experience.split("\n") if item.strip()]
+    education_lines = [item.strip() for item in education.split("\n") if item.strip()]
+    project_lines = [item.strip() for item in projects.split("\n") if item.strip()]
+
+    top_skills = ", ".join(skills_list[:6]) if skills_list else "relevant professional skills"
+
+    summary = (
+        f"{name} is a {title} with experience in {top_skills}. "
+        f"Known for delivering high-quality work, strong communication, and professional execution."
+    )
+
+    resume_text = f"""# {name}
+
+**{title}**  
+Email: {email or "your.email@example.com"}  
+Phone: {phone or "Your phone number"}  
+Location: {location or "Your location"}
+
+## Professional Summary
+{summary}
+
+## Skills
+"""
+    if skills_list:
+        for item in skills_list:
+            resume_text += f"- {item}\n"
+    else:
+        resume_text += "- Add your key skills here\n"
+
+    resume_text += "\n## Work Experience\n"
+    if experience_lines:
+        for item in experience_lines:
+            resume_text += f"- {item}\n"
+    else:
+        resume_text += "- Add your work experience here\n"
+
+    resume_text += "\n## Education\n"
+    if education_lines:
+        for item in education_lines:
+            resume_text += f"- {item}\n"
+    else:
+        resume_text += "- Add your education here\n"
+
+    resume_text += "\n## Projects / Certifications\n"
+    if project_lines:
+        for item in project_lines:
+            resume_text += f"- {item}\n"
+    else:
+        resume_text += "- Add your projects, certifications, or training here\n"
+
+    return summary, resume_text
+
+
 def analyze_resume_basic(text, job_description=""):
     skills = extract_skills(text)
     job_skills = extract_skills_from_job_description(job_description)
@@ -258,6 +359,13 @@ def analyze_resume_basic(text, job_description=""):
     match_score = calculate_match_score(skills, job_skills)
     summary = generate_resume_summary(text, skills)
     rewritten_summary, rewrite_tips = generate_resume_rewrite(text, skills, job_description)
+    ats_improvement_suggestions = generate_ats_improvement_suggestions(
+        text=text,
+        email=email,
+        phone=phone,
+        missing_skills=missing_skills,
+        job_description=job_description
+    )
 
     strengths = []
     weaknesses = []
@@ -326,5 +434,6 @@ def analyze_resume_basic(text, job_description=""):
         "summary": summary,
         "match_score": match_score,
         "rewritten_summary": rewritten_summary,
-        "rewrite_tips": rewrite_tips
+        "rewrite_tips": rewrite_tips,
+        "ats_improvement_suggestions": ats_improvement_suggestions
     }
