@@ -168,6 +168,12 @@ Possible upgrades include:
 
 ---
 
+# Video Demo
+
+Watch the demo here:
+
+https://www.loom.com/share/9a0004bcb94547d6b64fd8c9d91743c7
+
 # Author
 
 Abdullah Alrefai
