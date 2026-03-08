@@ -145,7 +145,7 @@ def calculate_resume_score(text, skills, job_skills):
         matched = len(set(skills) & set(job_skills))
         score += min(matched * 5, 10)
 
-    return min(score, 100)
+    return min(score, 95)
 
 
 def calculate_ats_score(text, skills):
@@ -179,7 +179,7 @@ def calculate_ats_score(text, skills):
     if re.search(r'(\+?\d[\d\s\-\(\)]{7,}\d)', text):
         score += 5
 
-    return min(score, 100)
+    return min(score, 95)
 
 
 def calculate_match_score(resume_skills, job_skills):
@@ -303,17 +303,16 @@ def generate_resume_builder_output(name, title, email, phone, location, skills, 
         f"Known for delivering high-quality work, strong communication, and professional execution."
     )
 
-    resume_text = f"""# {name}
-
-**{title}**  
-Email: {email or "your.email@example.com"}  
-Phone: {phone or "Your phone number"}  
+    resume_text = f"""{name}
+{title}
+Email: {email or "your.email@example.com"}
+Phone: {phone or "Your phone number"}
 Location: {location or "Your location"}
 
-## Professional Summary
+PROFESSIONAL SUMMARY
 {summary}
 
-## Skills
+SKILLS
 """
     if skills_list:
         for item in skills_list:
@@ -321,21 +320,21 @@ Location: {location or "Your location"}
     else:
         resume_text += "- Add your key skills here\n"
 
-    resume_text += "\n## Work Experience\n"
+    resume_text += "\nWORK EXPERIENCE\n"
     if experience_lines:
         for item in experience_lines:
             resume_text += f"- {item}\n"
     else:
         resume_text += "- Add your work experience here\n"
 
-    resume_text += "\n## Education\n"
+    resume_text += "\nEDUCATION\n"
     if education_lines:
         for item in education_lines:
             resume_text += f"- {item}\n"
     else:
         resume_text += "- Add your education here\n"
 
-    resume_text += "\n## Projects / Certifications\n"
+    resume_text += "\nPROJECTS / CERTIFICATIONS\n"
     if project_lines:
         for item in project_lines:
             resume_text += f"- {item}\n"
@@ -367,66 +366,10 @@ def analyze_resume_basic(text, job_description=""):
         job_description=job_description
     )
 
-    strengths = []
-    weaknesses = []
-    suggestions = []
-
-    if skills:
-        strengths.append("The resume includes identifiable skills.")
-    else:
-        weaknesses.append("No clear skills were detected.")
-        suggestions.append("Add a clear skills section with role-related skills.")
-
-    if has_any_section(text, SECTION_KEYWORDS["education"]):
-        strengths.append("Education information is present.")
-    else:
-        weaknesses.append("Education section is missing or unclear.")
-        suggestions.append("Add your degree, university, and graduation year clearly.")
-
-    if has_any_section(text, SECTION_KEYWORDS["experience"]):
-        strengths.append("Work experience information is present.")
-    else:
-        weaknesses.append("Experience section is missing or unclear.")
-        suggestions.append("Add work experience, internships, or freelance projects.")
-
-    if has_any_section(text, SECTION_KEYWORDS["skills"]):
-        strengths.append("There is a dedicated skills or qualifications section.")
-    else:
-        weaknesses.append("Skills section is missing or unclear.")
-        suggestions.append("Create a dedicated skills section for better readability.")
-
-    if email:
-        strengths.append("Email address detected.")
-    else:
-        weaknesses.append("Email address is missing.")
-        suggestions.append("Add a professional email address.")
-
-    if phone:
-        strengths.append("Phone number detected.")
-    else:
-        weaknesses.append("Phone number is missing.")
-        suggestions.append("Add a phone number so employers can contact you.")
-
-    if len(text) < 400:
-        weaknesses.append("The resume content looks too short.")
-        suggestions.append("Add more detail about responsibilities, achievements, and qualifications.")
-
-    if not has_any_section(text, SECTION_KEYWORDS["projects"]):
-        suggestions.append("Add projects, achievements, certifications, or training courses if relevant.")
-
-    if missing_skills:
-        suggestions.append("Include missing job-related skills only if you truly have them.")
-
-    if not suggestions:
-        suggestions.append("The resume looks good overall. Improve formatting and tailor it for each job.")
-
     return {
         "score": score,
         "ats_score": ats_score,
         "skills": skills,
-        "strengths": strengths,
-        "weaknesses": weaknesses,
-        "suggestions": suggestions,
         "missing_skills": missing_skills,
         "matched_skills": matched_skills,
         "email": email,
