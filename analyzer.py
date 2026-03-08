@@ -215,17 +215,16 @@ def generate_resume_rewrite(text, skills, job_description=""):
     if job_description.strip():
         rewrite = (
             f"Results-driven {role} with experience in {top_skills_text}. "
-            f"Demonstrates a strong background in delivering high-quality work, "
-            f"maintaining professional standards, and adapting experience to match job requirements. "
-            f"Brings a combination of technical knowledge, practical execution, and communication skills "
-            f"that can add value in fast-paced work environments."
+            f"Demonstrates a strong background in delivering high-quality work, maintaining professional standards, "
+            f"and adapting experience to match job requirements. Brings a combination of technical knowledge, "
+            f"practical execution, and communication skills that can add value in fast-paced work environments."
         )
     else:
         rewrite = (
             f"Results-driven {role} with experience in {top_skills_text}. "
-            f"Demonstrates a strong background in professional responsibilities, practical execution, "
-            f"and continuous improvement. Brings a combination of relevant expertise, organization, "
-            f"and communication skills that supports success across day-to-day operations and long-term goals."
+            f"Demonstrates a strong background in professional responsibilities, practical execution, and continuous improvement. "
+            f"Brings a combination of relevant expertise, organization, and communication skills that supports success "
+            f"across day-to-day operations and long-term goals."
         )
 
     rewrite_tips = [
@@ -271,15 +270,15 @@ def generate_resume_builder_output(name, title, email, phone, location, skills, 
     education_lines = [item.strip() for item in education.split("\n") if item.strip()]
     project_lines = [item.strip() for item in projects.split("\n") if item.strip()]
 
+    role_text = title.strip() if title.strip() else "Professional"
     top_skills = ", ".join(skills_list[:6]) if skills_list else "relevant professional skills"
-    role_text = title if title.strip() else "Professional"
 
     summary = (
-        f"{name} is a {role_text} with experience in {top_skills}. "
-        f"Known for delivering high-quality work, strong communication, and professional execution."
+        f"{name or 'Your Name'} is an {role_text}" if role_text[0].lower() in "aeiou" else f"{name or 'Your Name'} is a {role_text}"
     )
+    summary += f" with experience in {top_skills}. Known for delivering high-quality work, strong communication, and professional execution."
 
-    resume_text = f"""{name}
+    resume_text = f"""{name or "Your Name"}
 {role_text}
 Email: {email or "your.email@example.com"}
 Phone: {phone or "Your phone number"}
@@ -334,37 +333,44 @@ def generate_resume_template_output(template_style, name, title, email, phone, l
     )
 
     header = f"TEMPLATE STYLE: {template_style}\n" + "=" * 50 + "\n"
+
     if template_style == "Classic Professional":
         return header + resume_text
-    if template_style == "Modern Minimal":
-        return header + f"{name} | {title}\n{location} | {email} | {phone}\n\n{resume_text}"
-    return header + f"ATS OPTIMIZED VERSION\n\n{resume_text}"
+    elif template_style == "Modern Minimal":
+        return (
+            header
+            + f"{name or 'Your Name'} | {title or 'Professional'}\n"
+            + f"{location or 'Your location'} | {email or 'your.email@example.com'} | {phone or 'Your phone number'}\n\n"
+            + resume_text
+        )
+    else:
+        return header + "ATS OPTIMIZED VERSION\n\n" + resume_text
 
 
 def generate_cover_letter(name, role, company, skills, experience, job_description):
-    skills_text = skills if skills.strip() else "relevant skills"
-    experience_text = experience if experience.strip() else "hands-on practical experience"
-
-    company_text = company if company.strip() else "your company"
-    role_text = role if role.strip() else "the role"
+    name_text = name.strip() if name.strip() else "Your Name"
+    role_text = role.strip() if role.strip() else "the role"
+    company_text = company.strip() if company.strip() else "your company"
+    skills_text = skills.strip() if skills.strip() else "relevant technical and professional skills"
+    experience_text = experience.strip() if experience.strip() else "hands-on practical experience"
 
     extra = ""
     if job_description.strip():
         extra = (
-            "\nI have reviewed the role requirements carefully and I believe my background aligns well "
-            "with the skills and expectations described in the job posting."
+            " I reviewed the role requirements carefully and I believe my background aligns well "
+            "with the technical expectations and practical needs described in the job posting."
         )
 
     return f"""Dear Hiring Manager,
 
-I am writing to express my interest in the {role_text} position at {company_text}. With a background in {skills_text}, along with {experience_text}, I am confident in my ability to contribute meaningful value to your team.
+I am writing to express my interest in the {role_text} position at {company_text}. With a background in {skills_text} and {experience_text}, I am confident in my ability to contribute meaningful value to your team.
 
 Throughout my work, I have focused on delivering high-quality results, improving processes, and maintaining strong communication and professional standards.{extra}
 
 I would welcome the opportunity to discuss how my background, skills, and motivation can support your team’s goals. Thank you for your time and consideration.
 
 Sincerely,
-{name or "Your Name"}"""
+{name_text}"""
 
 
 def analyze_resume_basic(text, job_description=""):
